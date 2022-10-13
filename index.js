@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import pg from 'pg';
 import joi from 'joi';
 import bcrypt from 'bcrypt';
+import {v4 as uuid} from 'uuid';
 
 const server = express();
 dotenv.config();
@@ -26,15 +27,15 @@ server.use(cors());
 // ----- SCHEMAS -----
 
 const signupSchema = joi.object({
-    name: joi.string().required(),
-    email: joi.string().required(),
-    password: joi.string().required(),
-    confirmPassword: joi.string().required()
+    name: joi.string().min(1).required(),
+    email: joi.string().min(1).required(),
+    password: joi.string().min(1).required(),
+    confirmPassword: joi.string().min(1).required()
 });
 
 const signinSchema = joi.object({
-    email: joi.string().required(),
-    password: joi.string().required()
+    email: joi.string().min(1).required(),
+    password: joi.string().min(1).required()
 });
 
 const urlSchema = joi.object({
@@ -99,6 +100,44 @@ server.post('/signup', async (req,res) => {
 
     return
 
+});
+
+server.post('/signin', async (req,res) => {
+
+    const {email, password} = req.body;
+
+    const validation = signinSchema.validate(req.body, {abortEarly: false});
+
+    if (validation.error){
+
+        const errors = validation.error.details.map(err=>err.message);
+        return res.status(422).send(errors)
+
+    }
+
+    const users = await connection.query('SELECT * FROM users WHERE email = $1;',[email])
+
+    const userId = users.rows[0].id;
+
+    if (users.rowCount === 0){
+        return res.sendStatus(401)
+    }
+
+    const passwordIsValid = bcrypt.compareSync(password, users.rows[0].password)
+
+    if (!passwordIsValid){
+        return res.sendStatus(401)
+    }
+
+    // Gerar um token
+
+    let token = uuid();
+
+    connection.query('INSERT INTO sessions (token, "userId") VALUES ($1,$2);',[token, userId])
+
+    //Dar um res.status(200).send({token: VALOR})
+
+    return res.status(200).send({token: token})
 });
 
 
