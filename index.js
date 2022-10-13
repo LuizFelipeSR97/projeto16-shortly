@@ -129,15 +129,47 @@ server.post('/signin', async (req,res) => {
         return res.sendStatus(401)
     }
 
-    // Gerar um token
-
     let token = uuid();
 
     connection.query('INSERT INTO sessions (token, "userId") VALUES ($1,$2);',[token, userId])
 
-    //Dar um res.status(200).send({token: VALOR})
-
     return res.status(200).send({token: token})
+});
+
+//rota post (/urls/shorten)
+
+server.get('/urls/:id', async (req,res) => {
+
+    const urlId = req.params.id;
+
+    const urlSearched = await connection.query('SELECT * FROM urls WHERE id = $1;',[urlId])
+
+    if (urlSearched.rowCount===0){
+        return res.sendStatus(404)
+    }
+
+    const {id, shortUrl, url} = urlSearched.rows[0]
+
+    return res.status(200).send({id, shortUrl, url})
+});
+
+server.get('/urls/open/:shortUrl', async (req,res) => {
+
+
+    const shortUrl = req.params.shortUrl;
+
+    const shortUrlSearched = await connection.query('SELECT * FROM urls WHERE "shortUrl" = $1;',[shortUrl])
+
+    if (shortUrlSearched.rowCount===0){
+        return res.sendStatus(404)
+    }
+
+    let {url, visitors} = shortUrlSearched.rows[0]
+    visitors += 1
+
+    connection.query(`UPDATE urls SET visitors=$1 WHERE "shortUrl" = $2;`,[visitors, shortUrl])
+
+    return res.redirect(url)
 });
 
 
