@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import pg from 'pg';
 import joi from 'joi';
+import bcrypt from 'bcrypt';
 
 const server = express();
 dotenv.config();
@@ -67,7 +68,7 @@ server.get('/urls', (req,res) => {
 
 server.post('/signup', async (req,res) => {
 
-    const {name, email, password, confirmPassword} = req.body;
+    let {name, email, password, confirmPassword} = req.body;
 
     const validation = signupSchema.validate(req.body, {abortEarly: false});
 
@@ -90,6 +91,8 @@ server.post('/signup', async (req,res) => {
 
     // Fazer um post do novo usuario
 
+    password = bcrypt.hashSync(password, 10)
+
         // Falta usar a hash no password
 
     connection.query('INSERT INTO users (name, email, password) VALUES ($1,$2,$3);',[name,email,password]).then(result => {res.sendStatus(201)})
@@ -97,6 +100,8 @@ server.post('/signup', async (req,res) => {
     return
 
 });
+
+
 
 // --------------------
 
