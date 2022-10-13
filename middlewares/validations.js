@@ -1,4 +1,4 @@
-import { urlSchema, signinSchema, signupSchema } from "../schemas/schemas";
+import { urlSchema, signinSchema, signupSchema } from "../schemas/schemas.js";
 
 async function signInValidation(req, res, next){
 

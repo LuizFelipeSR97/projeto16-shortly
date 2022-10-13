@@ -22,34 +22,88 @@ server.use(cors());
 
 
 
-//SCHEMAS
+// ----- SCHEMAS -----
 
-const userSchema = joi.object({
+const signupSchema = joi.object({
     name: joi.string().required(),
     email: joi.string().required(),
     password: joi.string().required(),
     confirmPassword: joi.string().required()
 });
 
-// TESTAR O ACESSO AO DB
+const signinSchema = joi.object({
+    email: joi.string().required(),
+    password: joi.string().required()
+});
 
-server.post('/signup', (req,res) => {
+const urlSchema = joi.object({
+    url: joi.string().required()
+});
 
-    //Verificar com joi se o body ta de acordo
+// --------------------
 
-
-    console.log(connection);
-    connection.query('SELECT * FROM users').then(response => {
-        res.send(response.rows)
-    })
-})
+// -----  ROUTES  -----
 
 server.get('/users', (req,res) => {
-    console.log(connection);
     connection.query('SELECT * FROM users').then(response => {
         res.send(response.rows)
     })
 })
+
+server.get('/sessions', (req,res) => {
+    connection.query('SELECT * FROM sessions').then(response => {
+        res.send(response.rows)
+    })
+})
+
+server.get('/urls', (req,res) => {
+    connection.query('SELECT * FROM urls').then(response => {
+        res.send(response.rows)
+    })
+})
+
+
+
+
+server.post('/signup', async (req,res) => {
+
+    const {name, email, password, confirmPassword} = req.body;
+
+    const validation = signupSchema.validate(req.body, {abortEarly: false});
+
+    if (validation.error){
+
+        const errors = validation.error.details.map(err=>err.message);
+        return res.status(422).send(errors)
+
+    }
+
+    if (password != confirmPassword){
+        return res.sendStatus(422)
+    }
+
+    const users = await connection.query('SELECT * FROM users WHERE email = $1;',[email])
+
+    if (users.rowCount > 0){
+        return res.sendStatus(409)
+    }
+
+    // Fazer um post do novo usuario
+
+        // Falta usar a hash no password
+
+    connection.query('INSERT INTO users (name, email, password) VALUES ($1,$2,$3);',[name,email,password]).then(result => {res.sendStatus(201)})
+
+    return
+
+});
+
+// --------------------
+
+
+// TESTAR O ACESSO AO DB
+
+
 
 server.get('/sessions', (req,res) => {
     console.log(connection);
