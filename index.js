@@ -46,27 +46,6 @@ const urlSchema = joi.object({
 
 // -----  ROUTES  -----
 
-server.get('/users', (req,res) => {
-    connection.query('SELECT * FROM users').then(response => {
-        res.send(response.rows)
-    })
-})
-
-server.get('/sessions', (req,res) => {
-    connection.query('SELECT * FROM sessions').then(response => {
-        res.send(response.rows)
-    })
-})
-
-server.get('/urls', (req,res) => {
-    connection.query('SELECT * FROM urls').then(response => {
-        res.send(response.rows)
-    })
-})
-
-
-
-
 server.post('/signup', async (req,res) => {
 
     let {name, email, password, confirmPassword} = req.body;
@@ -172,6 +151,41 @@ server.get('/urls/open/:shortUrl', async (req,res) => {
     return res.redirect(url)
 });
 
+server.delete('/urls/:id', async (req,res) => {
+
+    const id = req.params.id
+    const {authorization} = req.headers
+    const token = authorization?.replace('Bearer ','');
+
+    if (!token){
+        return res.sendStatus(401)
+    }
+
+    const tokenSession = await connection.query('SELECT * FROM sessions WHERE token = $1;',[token])
+
+    if (tokenSession.rowCount===0){
+        return res.sendStatus(401)
+    }
+
+    const userId = tokenSession.rows[0].userId
+
+    const urlSearched = await connection.query('SELECT * FROM urls WHERE id = $1;',[id])
+
+    if (urlSearched.rowCount===0){
+        return res.sendStatus(404)
+    }
+
+    if (urlSearched.rows[0].userId != userId){
+        return res.sendStatus(401)
+    }
+
+    await connection.query('DELETE FROM urls WHERE id = $1;',[id])
+
+    return res.sendStatus(204)  
+});
+
+//rota get (/users/me)
+
 server.get('/ranking', async (req,res) => {
 
     const ranking = await connection.query(`SELECT urls."userId" AS id, users.name, COUNT (urls."userId") AS "linksCount", SUM(urls.visitors) AS "visitCount" FROM urls JOIN users ON urls."userId" = users.id GROUP BY urls."userId", users.name ORDER BY "visitCount" DESC LIMIT 10
@@ -181,7 +195,6 @@ server.get('/ranking', async (req,res) => {
 
     return res.status(200).send(ranking.rows)
 });
-
 
 
 // --------------------
