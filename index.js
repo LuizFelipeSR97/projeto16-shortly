@@ -201,7 +201,7 @@ server.get('/users/me', async (req,res) => {
 
     const userId = tokenSession.rows[0].userId
 
-    const urlsSearched = await connection.query('SELECT * FROM urls	WHERE "userId" = $1;',[userId])
+    let urlsSearched = await connection.query('SELECT id, "shortUrl", url, visitors AS "visitCount" FROM urls	WHERE "userId" = $1;',[userId])
 
     const userUrls = urlsSearched.rows
 
