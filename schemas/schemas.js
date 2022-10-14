@@ -1,13 +1,13 @@
 import joi from 'joi';
 
-const signupSchema = joi.object({
+const signUpSchema = joi.object({
     name: joi.string().required(),
     email: joi.string().required(),
     password: joi.string().required(),
     confirmPassword: joi.string().required()
 });
 
-const signinSchema = joi.object({
+const signInSchema = joi.object({
     email: joi.string().required(),
     password: joi.string().required()
 });
@@ -16,4 +16,4 @@ const urlSchema = joi.object({
     url: joi.string().required()
 });
 
-export {signinSchema, signupSchema, urlSchema};
+export {signInSchema, signUpSchema, urlSchema};

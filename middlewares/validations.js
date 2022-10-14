@@ -1,8 +1,8 @@
-import { urlSchema, signinSchema, signupSchema } from "../schemas/schemas.js";
+import { urlSchema, signInSchema, signUpSchema } from "../schemas/schemas.js";
 
 async function signInValidation(req, res, next){
 
-    const validation = signinSchema.validate(req.body, {abortEarly: false});
+    const validation = signInSchema.validate(req.body, {abortEarly: false});
 
     if (validation.error){
 
@@ -11,13 +11,13 @@ async function signInValidation(req, res, next){
 
     }
 
-    next
+    next();
 
 }
 
 async function signUpValidation(req, res, next){
 
-    const validation = signupSchema.validate(req.body, {abortEarly: false});
+    const validation = signUpSchema.validate(req.body, {abortEarly: false});
 
     if (validation.error){
 
@@ -26,7 +26,7 @@ async function signUpValidation(req, res, next){
 
     }
 
-    next
+    next();
 
 }
 
@@ -41,7 +41,7 @@ async function urlValidation(req, res, next){
 
     }
 
-    next
+    next();
 
 }
 
