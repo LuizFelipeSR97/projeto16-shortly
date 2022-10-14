@@ -184,7 +184,33 @@ server.delete('/urls/:id', async (req,res) => {
     return res.sendStatus(204)  
 });
 
-//rota get (/users/me)
+server.get('/users/me', async (req,res) => {
+
+    const {authorization} = req.headers
+    const token = authorization?.replace('Bearer ','');
+
+    if (!token){
+        return res.sendStatus(401)
+    }
+
+    const tokenSession = await connection.query('SELECT * FROM sessions WHERE token = $1;',[token])
+
+    if (tokenSession.rowCount===0){
+        return res.sendStatus(401)
+    }
+
+    const userId = tokenSession.rows[0].userId
+
+    const urlsSearched = await connection.query('SELECT * FROM urls	WHERE "userId" = $1;',[userId])
+
+    const userUrls = urlsSearched.rows
+
+    const userSearched = await connection.query(`SELECT urls."userId" AS id, users.name, SUM(urls.visitors) AS "visitCount" FROM urls JOIN users ON urls."userId" = users.id WHERE urls."userId" = $1 GROUP BY urls."userId", users.name;`,[userId])
+
+    const response = {id: userSearched.rows[0].id, name: userSearched.rows[0].name, visitCount: userSearched.rows[0].visitCount, shortenedUrls: userUrls}
+
+    return res.send(response)
+});
 
 server.get('/ranking', async (req,res) => {
 
