@@ -5,6 +5,7 @@ import pg from 'pg';
 import joi from 'joi';
 import bcrypt from 'bcrypt';
 import {v4 as uuid} from 'uuid';
+import {nanoid} from 'nanoid';
 
 const server = express();
 dotenv.config();
@@ -21,8 +22,6 @@ const connection = new Pool ({
 
 server.use(express.json());
 server.use(cors());
-
-
 
 // ----- SCHEMAS -----
 
@@ -41,8 +40,6 @@ const signinSchema = joi.object({
 const urlSchema = joi.object({
     url: joi.string().required()
 });
-
-// --------------------
 
 // -----  ROUTES  -----
 
@@ -115,7 +112,39 @@ server.post('/signin', async (req,res) => {
     return res.status(200).send({token: token})
 });
 
-//rota post (/urls/shorten)
+server.post('/urls/shorten', async (req,res) => {
+
+    const {url} = req.body;
+    const {authorization} = req.headers
+    const token = authorization?.replace('Bearer ','');
+
+    const validation = urlSchema.validate(req.body, {abortEarly: false});
+
+    if (validation.error){
+
+        const errors = validation.error.details.map(err=>err.message);
+        return res.status(422).send(errors)
+
+    }
+
+    if (!token){
+        return res.sendStatus(401)
+    }
+
+    const tokenSession = await connection.query('SELECT * FROM sessions WHERE token = $1;',[token])
+
+    if (tokenSession.rowCount===0){
+        return res.sendStatus(401)
+    }
+
+    const userId = tokenSession.rows[0].userId
+
+    const shortUrl = nanoid()
+
+    await connection.query(`INSERT INTO urls ("userId", url, "shortUrl") VALUES ($1,$2,$3);`,[userId,url,shortUrl])
+
+    return res.status(201).send({shortUrl: shortUrl})
+});
 
 server.get('/urls/:id', async (req,res) => {
 
@@ -221,27 +250,5 @@ server.get('/ranking', async (req,res) => {
 
     return res.status(200).send(ranking.rows)
 });
-
-
-// --------------------
-
-
-// TESTAR O ACESSO AO DB
-
-
-
-server.get('/sessions', (req,res) => {
-    console.log(connection);
-    connection.query('SELECT * FROM sessions').then(response => {
-        res.send(response.rows)
-    })
-})
-
-server.get('/urls', (req,res) => {
-    console.log(connection);
-    connection.query('SELECT * FROM urls').then(response => {
-        res.send(response.rows)
-    })
-})
 
 server.listen(process.env.PORT, ()=> console.log(`Server running on port ${process.env.PORT}`));
