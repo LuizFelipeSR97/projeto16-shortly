@@ -29,9 +29,3 @@ server.get('/users', async (req,res) => {
 });
 
 server.listen(process.env.PORT, ()=> console.log(`Server running on port ${process.env.PORT}`));
-
-
-/* Falta:
-    - Fazer o dump
-    - Fazer o deploy do backend e do banco com o Heroku
-*/

@@ -7,7 +7,7 @@ async function signUp(req,res){
     let {name, email, password, confirmPassword} = req.body;
 
     if (password != confirmPassword){
-        return res.sendStatus(422)
+        return res.status(422).send('Both password and confirmPassword must match')
     }
 
     const users = await connection.query('SELECT * FROM users WHERE email = $1;',[email])
