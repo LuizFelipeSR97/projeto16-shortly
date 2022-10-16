@@ -9,7 +9,7 @@ async function userInfo(req,res){
     if (userSearched.rowCount===0){
         const newUserSearched = await connection.query(`SELECT * FROM users WHERE id = $1;`[res.locals.userId])
         const response = {id: res.locals.userId, name: newUserSearched.rows[0].name, visitCount: 0, shortenedUrls: []}
-        res.send(response)
+        return res.send(response)
     }
 
     const response = {id: userSearched.rows[0].id, name: userSearched.rows[0].name, visitCount: userSearched.rows[0].visitCount, shortenedUrls: userUrls}
