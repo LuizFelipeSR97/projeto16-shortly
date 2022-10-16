@@ -15,7 +15,6 @@ async function redirect(req,res){
 
     await connection.query(`UPDATE urls SET visitors=$1 WHERE "shortUrl" = $2;`,[visitors, shortUrl])
 
-    return res.redirect('https://ge.globo.com')
     return res.redirect(url)
 }
 
