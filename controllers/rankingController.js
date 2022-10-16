@@ -7,6 +7,4 @@ async function ranking(req,res){
     return res.status(200).send(ranking.rows)
 }
 
-export {ranking};
-
-
+export {ranking}
