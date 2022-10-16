@@ -12,7 +12,7 @@ async function userInfo(req,res){
 
     const userSearched = await connection.query('SELECT urls."userId" AS id, users.name, SUM(urls.visitors) AS "visitCount" FROM urls JOIN users ON urls."userId" = users.id WHERE urls."userId" = $1 GROUP BY urls."userId", users.name;',[res.locals.userId])
 
-    return res.send(userUrls)
+    return res.send(userSearched)
 
     if (userSearched.rowCount===0){
         const newUserSearched = await connection.query('SELECT * FROM users WHERE id = $1;',[res.locals.userId])
