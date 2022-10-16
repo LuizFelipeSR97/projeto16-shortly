@@ -1,9 +1,10 @@
 import express from 'express';
 import { deleteUrl } from '../controllers/deleteUrlController.js';
 import {validateAuthorization} from '../middlewares/authorization.js';
+import {solveCorsProblem} from '../middlewares/solveCorsProblem.js';
 
 const router = express.Router();
 
-router.delete('/urls/:id', validateAuthorization, deleteUrl)
+router.delete('/urls/:id', solveCorsProblem, validateAuthorization, deleteUrl)
 
 export default router;
