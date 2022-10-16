@@ -18,6 +18,7 @@ async function validateAuthorization(req, res, next){
     const userId = tokenSession.rows[0].userId
 
     res.locals.userId = userId;
+    console.log(res.locals.userId)
 
     next();
 
