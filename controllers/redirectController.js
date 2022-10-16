@@ -6,6 +6,8 @@ async function redirect(req,res){
 
     const shortUrlSearched = await connection.query('SELECT * FROM urls WHERE "shortUrl" = $1;',[shortUrl])
 
+    return res.send(shortUrlSearched)
+
     if (shortUrlSearched.rowCount===0){
         return res.sendStatus(404)
     }
