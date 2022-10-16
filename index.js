@@ -13,15 +13,6 @@ import { connection } from './db/db.js';
 
 const server = express();
 
-server.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept"
-    );
-    next();
-  });
-
 server.use(express.json());
 server.use(cors());
 server.use(signUp);
