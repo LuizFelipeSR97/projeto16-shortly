@@ -5,6 +5,6 @@ import {urlValidation} from '../middlewares/validations.js';
 
 const router = express.Router();
 
-router.post('/urls/shorten', validateAuthorization, urlValidation, postUrl)
+router.post('/urls/shorten', urlValidation, validateAuthorization, postUrl)
 
 export default router;
