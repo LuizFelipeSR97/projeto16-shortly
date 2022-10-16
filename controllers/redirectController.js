@@ -6,8 +6,6 @@ async function redirect(req,res){
 
     const shortUrlSearched = await connection.query('SELECT * FROM urls WHERE "shortUrl" = $1;',[shortUrl])
 
-    return res.send(shortUrlSearched)
-
     if (shortUrlSearched.rowCount===0){
         return res.sendStatus(404)
     }
@@ -15,10 +13,10 @@ async function redirect(req,res){
     let {url, visitors} = shortUrlSearched.rows[0]
     visitors += 1
 
-    connection.query(`UPDATE urls SET visitors=$1 WHERE "shortUrl" = $2;`,[visitors, shortUrl])
+    await connection.query(`UPDATE urls SET visitors=$1 WHERE "shortUrl" = $2;`,[visitors, shortUrl])
 
+    return res.redirect('https://ge.globo.com')
     return res.redirect(url)
-
 }
 
 export {redirect};
